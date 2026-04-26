@@ -9,7 +9,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <style>
-    body { font-family: 'Segoe UI', system-ui, sans-serif; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; overflow-x: hidden; }
+    html { overflow-x: hidden; }
+    .container-lg { max-width: 100%; padding-left: 16px; padding-right: 16px; }
     .font-syne { font-family: 'Syne', sans-serif; }
     .font-mono { font-family: 'DM Mono', monospace; font-size: 0.8rem; }
     .brand-gradient { background: linear-gradient(135deg,#4f6ef7,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
@@ -44,7 +46,6 @@
     <a class="navbar-brand d-flex align-items-center gap-2" href="#">
       <div class="rounded-2 d-flex align-items-center justify-content-center fw-bold text-white" style="width:36px;height:36px;background:linear-gradient(135deg,#4f6ef7,#a855f7);font-family:Syne,sans-serif">TG</div>
       <span class="fw-bold font-syne fs-5">TextGuard</span>
-      <span class="badge text-bg-primary ms-1" style="font-size:.6rem;letter-spacing:1px">WORLD-CLASS</span>
     </a>
     <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
       <i class="bi bi-list fs-4"></i>
@@ -67,9 +68,9 @@
 <!-- ═══════════ HERO ═══════════ -->
 <section class="hero-bg py-5">
   <div class="container-lg py-4 text-center">
-    <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 px-3 py-2 mb-3 font-mono">
+    <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 px-3 py-2 mb-3 font-mono d-inline-block" style="white-space:normal;max-width:100%">
       <i class="bi bi-award-fill me-1 text-warning"></i>
-      World's Most Advanced · 18 NLP Algorithms · 100% Free · No Login Required
+      World's Most Advanced · 25 NLP Algorithms · 100% Free · No Login
     </span>
     <h1 class="display-4 fw-bold font-syne mb-3">
       Detect AI Writing &amp; <span class="brand-gradient">Plagiarism Instantly</span>
@@ -88,7 +89,7 @@
 
     <!-- Stats -->
     <div class="row g-3 justify-content-center">
-      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 card-hover"><div class="display-6 fw-bold text-primary font-syne">18</div><div class="small text-secondary">NLP Algorithms</div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 card-hover"><div class="display-6 fw-bold text-primary font-syne">25</div><div class="small text-secondary">NLP Algorithms</div></div></div>
       <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 card-hover"><div class="display-6 fw-bold text-success font-syne">100%</div><div class="small text-secondary">Browser-Based</div></div></div>
       <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 card-hover"><div class="display-6 fw-bold text-warning font-syne">0</div><div class="small text-secondary">Data Uploaded</div></div></div>
       <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 card-hover"><div class="display-6 fw-bold text-danger font-syne">∞</div><div class="small text-secondary">Free Forever</div></div></div>
@@ -334,10 +335,50 @@
 // ═══════════════════════════════════════════════
 //  NLP ENGINE — 18 Algorithms
 // ═══════════════════════════════════════════════
-const AI_VOCAB = new Set(['delve','tapestry','nuanced','multifaceted','comprehensive','robust','crucial','pivotal','paramount','underscore','highlight','showcase','leverage','utilize','streamline','foster','facilitate','encompass','embody','exemplify','resonate','testament','landscape','ecosystem','synergy','paradigm','holistic','actionable','empower','navigate','catalyst','cornerstone','groundbreaking','revolutionary','seamlessly','intrinsically','fundamentally','moreover','furthermore','additionally','notably','significantly','ultimately','essentially','typically','particularly','increasingly','consistently','subsequently','consequently','nevertheless','nonetheless','whilst','amidst','plethora','myriad','realm','sphere','domain','trajectory','nexus','interplay','dynamic','innovative','transformative','unprecedented']);
+const AI_VOCAB = new Set(['delve','tapestry','nuanced','multifaceted','comprehensive','robust','crucial','pivotal','paramount','underscore','highlight','showcase','leverage','utilize','streamline','foster','facilitate','encompass','embody','exemplify','resonate','testament','landscape','ecosystem','synergy','paradigm','holistic','actionable','empower','navigate','catalyst','cornerstone','groundbreaking','revolutionary','seamlessly','intrinsically','fundamentally','moreover','furthermore','additionally','notably','significantly','ultimately','essentially','typically','particularly','increasingly','consistently','subsequently','consequently','nevertheless','nonetheless','whilst','amidst','plethora','myriad','realm','sphere','domain','trajectory','nexus','interplay','dynamic','innovative','transformative','unprecedented',
+  // Pattern 4: Promotional language (SKILL.md)
+  'vibrant','rich','profound','nestled','breathtaking','stunning','renowned','boasts','must-visit','enchanting',
+  // Pattern 7: Extended AI vocab from SKILL.md
+  'garner','intricacies','valuable','enduring','emphasizing','cultivating',
+  // Pattern 8: Copula avoidance
+  'serves','stands','marks','represents','boasts','features','offers',
+]);
 const AI_CONJ = new Set(['furthermore','moreover','additionally','consequently','nevertheless','nonetheless','subsequently','therefore','thus','hence','accordingly','henceforth']);
-const FILLER = ['it is worth noting','it should be noted','it is important to note','it is crucial to','in today\'s rapidly evolving','in the realm of','plays a crucial role','plays a vital role','plays a pivotal role','a wide range of','serves as a testament','marks a significant','highlights the importance','delve into','shed light on','pave the way','it goes without saying','as previously mentioned','underscores the importance','showcasing the potential','it is undeniable that'];
-const PROMO = ['groundbreaking','revolutionary','unprecedented','remarkable','extraordinary','exceptional','outstanding','unparalleled','innovative','world-class','game-changing','disruptive'];
+const FILLER = [
+  // Original list
+  'it is worth noting','it should be noted','it is important to note','it is crucial to','in today\'s rapidly evolving','in the realm of','plays a crucial role','plays a vital role','plays a pivotal role','a wide range of','serves as a testament','marks a significant','highlights the importance','delve into','shed light on','pave the way','it goes without saying','as previously mentioned','underscores the importance','showcasing the potential','it is undeniable that',
+  // Pattern 23: Filler phrases from SKILL.md
+  'in order to achieve','due to the fact that','at this point in time','in the event that','has the ability to','it is important to note that','based on available information','while specific details',
+  // Pattern 27: Persuasive authority tropes
+  'the real question is','at its core','in reality','what really matters','fundamentally','the deeper issue','the heart of the matter',
+  // Pattern 28: Signposting announcements
+  'let\'s dive in','let\'s explore','let\'s break this down','here\'s what you need to know','without further ado','now let\'s look at',
+  // Pattern 20: Chatbot artifacts
+  'i hope this helps','let me know if','would you like me to','great question','of course!','certainly!','you\'re absolutely right',
+  // Pattern 21: Knowledge-cutoff disclaimers
+  'as of my last','up to my last training','while specific details are limited','based on available information',
+  // Pattern 22: Sycophantic
+  'great question','excellent point','that\'s a great','you\'re absolutely right','that\'s an excellent',
+  // Pattern 25: Generic positive conclusions
+  'the future looks bright','exciting times lie ahead','continue their journey toward excellence','a major step in the right direction',
+  // Pattern 6: Challenges section
+  'despite its challenges','despite these challenges','faces challenges typical of','continues to thrive',
+];
+const PROMO = ['groundbreaking','revolutionary','unprecedented','remarkable','extraordinary','exceptional','outstanding','unparalleled','innovative','world-class','game-changing','disruptive',
+  // Pattern 4 extras
+  'vibrant','breathtaking','stunning','nestled','renowned','must-visit','boasts'
+];
+// Pattern 5: Vague attributions
+const VAGUE_ATTR = ['industry observers','experts argue','experts believe','experts say','observers have noted','some critics argue','several sources','industry reports','it is widely believed','many experts'];
+// Pattern 9: Negative parallelisms
+const NEG_PARALLEL_RE = /not just .{1,50} but|not only .{1,50} but also|it's not just about.{1,60}it's about|not merely .{1,40}it's/gi;
+// Pattern 12: False ranges
+const FALSE_RANGE_RE = /from \w[\w\s,]+ to \w[\w\s,]+, from \w[\w\s,]+ to/gi;
+// Pattern 26: Hyphenated compounds
+const HYPH = ['cross-functional','client-facing','data-driven','decision-making','well-known','high-quality','real-time','long-term','end-to-end','third-party','detail-oriented','fast-paced','best-in-class'];
+// Pattern 11: Elegant variation / synonym cycling detection
+const SYNONYM_CYCLES = [['protagonist','main character','central figure','hero'],['challenges','obstacles','hurdles','difficulties'],['said','stated','noted','remarked','observed','indicated']];
+
 const PASSIVE_RE = [/\b(is|are|was|were|be|been|being)\s+(being\s+)?\w+ed\b/gi,/\b(has|have|had)\s+been\s+\w+ed\b/gi];
 const BOILERPLATE = [
   {p:'studies have shown',s:'Common academic opener',r:'LOW'},
@@ -373,9 +414,17 @@ function ro3(text){return(text.match(/\b\w+(?:,\s*\w+){1},?\s+and\s+\w+\b/g)||[]
 function startDiv(sentences){const s=sentences.map(s=>(s.trim().split(/\s+/)[0]||'').toLowerCase());return new Set(s).size/Math.max(s.length,1)}
 function conjDens(tokens){return tokens.filter(t=>AI_CONJ.has(t)).length/Math.max(tokens.length,1)}
 function puffery(tokens){return tokens.filter(t=>PROMO.includes(t)).length/Math.max(tokens.length,1)}
-function negPar(text){return(text.match(/not just .{1,40} but|not only .{1,40} but also/gi)||[]).length/Math.max(sents(text).length,1)}
-function signpost(text){const sp=['firstly','secondly','thirdly','in conclusion','to summarize','in summary','as mentioned','the following','as follows'];const l=text.toLowerCase();return sp.filter(s=>l.includes(s)).length/Math.max(sents(text).length,1)}
+function negPar(text){return(text.match(NEG_PARALLEL_RE)||[]).length/Math.max(sents(text).length,1)}
+function signpost(text){const sp=['firstly','secondly','thirdly','in conclusion','to summarize','in summary','as mentioned','the following','as follows','let\'s dive','let\'s explore','here\'s what you need'];const l=text.toLowerCase();return sp.filter(s=>l.includes(s)).length/Math.max(sents(text).length,1)}
 function paraUnif(text){const p=paras(text);if(p.length<2)return 0;const l=p.map(x=>x.split(/\s+/).length);const m=l.reduce((a,b)=>a+b,0)/l.length;const sd=Math.sqrt(l.reduce((a,b)=>a+(b-m)**2,0)/l.length);return sd/Math.max(m,1)}
+// NEW from SKILL.md
+function vaguAttrScore(text){const l=text.toLowerCase();return VAGUE_ATTR.filter(v=>l.includes(v)).length/Math.max(sents(text).length,1)}
+function falseRangeScore(text){return(text.match(FALSE_RANGE_RE)||[]).length/Math.max(sents(text).length,1)}
+function hyphenScore(text){const l=text.toLowerCase();return HYPH.filter(h=>l.includes(h)).length/Math.max(sents(text).length,1)}
+function copulaScore(tokens){const copulas=['serves','stands','marks','represents','boasts','features','offers'];return tokens.filter(t=>copulas.includes(t)).length/Math.max(tokens.length,1)}
+function challengeSectionScore(text){const l=text.toLowerCase();const hits=['despite its challenges','despite these challenges','faces challenges typical','continues to thrive','future outlook','challenges and legacy'].filter(p=>l.includes(p));return hits.length}
+function knowledgeCutoffScore(text){const l=text.toLowerCase();return['as of my last','up to my last training','while specific details are limited','based on available information','as of the knowledge cutoff'].filter(p=>l.includes(p)).length}
+function sycophantScore(text){const l=text.toLowerCase();return['great question','excellent point','you\'re absolutely right','i hope this helps','let me know if you\'d like','of course!','certainly!'].filter(p=>l.includes(p)).length}
 
 function scoreSentence(s){
   const t=tok(s),l=s.toLowerCase();
@@ -408,12 +457,20 @@ function computeAI(text){
     negPar:Math.max(0,1-negPar(text)*20),
     sign:Math.max(0,1-signpost(text)*12),
     paraUnif:Math.min(paraUnif(text)*1.2,1),
+    // New from SKILL.md
+    vaguAttr:Math.max(0,1-vaguAttrScore(text)*15),
+    falseRange:Math.max(0,1-falseRangeScore(text)*20),
+    hyph:Math.max(0,1-hyphenScore(text)*10),
+    copula:Math.max(0,1-copulaScore(tokens)*30),
+    challenge:Math.max(0,1-challengeSectionScore(text)*0.4),
+    cutoff:Math.max(0,1-knowledgeCutoffScore(text)*0.5),
+    sycoph:Math.max(0,1-sycophantScore(text)*0.5),
   };
-  const w={burstiness:1.5,ttr:1.2,slvar:1.1,bigEnt:1.5,triEnt:1.2,ng3:1.1,ng4:.9,vocab:2.2,filler:1.9,passive:.9,emDash:.7,ro3:.8,startDiv:.9,conj:1,puff:1.1,negPar:.7,sign:.8,paraUnif:.8};
+  const w={burstiness:1.5,ttr:1.2,slvar:1.1,bigEnt:1.5,triEnt:1.2,ng3:1.1,ng4:.9,vocab:2.2,filler:1.9,passive:.9,emDash:.7,ro3:.8,startDiv:.9,conj:1,puff:1.1,negPar:.8,sign:.8,paraUnif:.8,vaguAttr:.9,falseRange:.7,hyph:.7,copula:.9,challenge:.8,cutoff:.7,sycoph:.8};
   let wSum=0,wTot=0;
   Object.keys(hs).forEach(k=>{wSum+=hs[k]*w[k];wTot+=w[k]});
   const humanScore=wSum/wTot;
-  return {aiScore:1-humanScore,humanScore,hs,tokens,sentences,sentScores:sentences.map(scoreSentence),fillerFound:fillerHits(text),vocabHits:[...new Set(tokens.filter(t=>AI_VOCAB.has(t)))],wordCount:tokens.length,sentCount:sentences.length,paraCount:paras(text).length};
+  return {aiScore:1-humanScore,humanScore,hs,tokens,sentences,sentScores:sentences.map(scoreSentence),fillerFound:fillerHits(text),vocabHits:[...new Set(tokens.filter(t=>AI_VOCAB.has(t)))],wordCount:tokens.length,sentCount:sentences.length,paraCount:paras(text).length,vaguAttrHits:VAGUE_ATTR.filter(v=>text.toLowerCase().includes(v)),sycophHits:sycophantScore(text),challengeHits:challengeSectionScore(text),cutoffHits:knowledgeCutoffScore(text)};
 }
 
 // SimHash / Plagiarism
@@ -476,6 +533,12 @@ function renderAI(r){
     {n:'Negative Parallelism',v:r.hs.negPar.toFixed(3),flag:r.hs.negPar<.8,d:'"Not just X but also Y" constructions'},
     {n:'Signposting',v:r.hs.sign.toFixed(3),flag:r.hs.sign<.7,d:'Firstly, secondly, in conclusion…'},
     {n:'Paragraph Uniformity',v:r.hs.paraUnif.toFixed(3),flag:r.hs.paraUnif<.4,d:'AI writes uniform paragraph lengths'},
+    {n:'Vague Attributions',v:r.vaguAttrHits.length,flag:r.vaguAttrHits.length>0,d:`Found: ${r.vaguAttrHits.slice(0,3).join(', ')||'none'} — SKILL.md Pattern #5`},
+    {n:'Chatbot Artifacts / Sycophancy',v:r.sycophHits,flag:r.sycophHits>0,d:'Great question!, I hope this helps!, You\'re absolutely right! — SKILL.md Pattern #20 & #22'},
+    {n:'Knowledge-Cutoff Disclaimers',v:r.cutoffHits,flag:r.cutoffHits>0,d:'"As of my last training", "While specific details are limited…" — SKILL.md Pattern #21'},
+    {n:'Challenges Section Formula',v:r.challengeHits,flag:r.challengeHits>0,d:'"Despite these challenges… continues to thrive" — SKILL.md Pattern #6'},
+    {n:'Copula Avoidance',v:r.hs.copula.toFixed(3),flag:r.hs.copula<.8,d:'"Serves as", "stands as", "marks", "represents" instead of simple "is/are" — SKILL.md Pattern #8'},
+    {n:'False Range Constructions',v:r.hs.falseRange.toFixed(3),flag:r.hs.falseRange<.85,d:'"From X to Y, from A to B" where items aren\'t on a meaningful scale — SKILL.md Pattern #12'},
     {n:'N-gram Repetition',v:`${Math.round((1-r.hs.ng3)*100/4)}%`,flag:r.hs.ng3<.55,d:'Repeated 3-word phrase rate'},
   ];
   const flagCount=flags.filter(f=>f.flag).length;
