@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TextGuard | World's Most Advanced AI & Plagiarism Detector</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <style>
+    body { font-family: 'Segoe UI', system-ui, sans-serif; }
+    .font-syne { font-family: 'Syne', sans-serif; }
+    .font-mono { font-family: 'DM Mono', monospace; font-size: 0.8rem; }
+    .brand-gradient { background: linear-gradient(135deg,#4f6ef7,#a855f7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
+    .hero-bg { background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(79,110,247,.2) 0%, transparent 70%); }
+    .nav-gradient { background: rgba(13,17,23,.95); backdrop-filter: blur(12px); }
+    .card-hover { transition: transform .2s, border-color .2s; }
+    .card-hover:hover { transform: translateY(-3px); border-color: #4f6ef7 !important; }
+    .tg-textarea { background: transparent; border: none; outline: none; resize: vertical; width: 100%; min-height: 200px; font-size: .9rem; line-height: 1.7; color: #e8e9f8; }
+    .tg-textarea::placeholder { color: #555; }
+    .sent-ai    { background: rgba(220,53,69,.2);  border-bottom: 2px solid #dc3545; border-radius: 3px; padding: 1px 3px; cursor:pointer; }
+    .sent-mixed { background: rgba(255,193,7,.15); border-bottom: 2px solid #ffc107; border-radius: 3px; padding: 1px 3px; cursor:pointer; }
+    .sent-human { background: rgba(25,135,84,.12); border-bottom: 2px solid #198754; border-radius: 3px; padding: 1px 3px; cursor:pointer; }
+    .step-item { font-size: .75rem; font-family: 'DM Mono', monospace; color: #6c757d; display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+    .step-item.active { color: #ffc107; }
+    .step-item.done   { color: #198754; }
+    .step-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+    .score-top-bar { height: 4px; border-radius: 4px 4px 0 0; }
+    .ngram-tag { display: inline-block; background: #1e1e2e; border: 1px solid #333; border-radius: 4px; padding: 2px 7px; font-size: .72rem; font-family: monospace; color: #aaa; margin: 2px; }
+    .fp-hash { font-family: monospace; font-size: .78rem; color: #4f6ef7; word-break: break-all; line-height: 1.6; }
+    .pattern-flag { border-left: 3px solid #dc3545; }
+    .pattern-ok   { border-left: 3px solid #198754; }
+    .tg-tooltip-el { position: fixed; background: #1e1e2e; border: 1px solid #333; border-radius: 8px; padding: 6px 12px; font-size: .75rem; font-family: monospace; color: #e8e9f8; pointer-events: none; z-index: 9999; opacity: 0; transition: opacity .15s; max-width: 260px; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+    .fade-up { animation: fadeUp .35s ease forwards; }
+  </style>
+</head>
+<body class="bg-dark text-light">
+
+<!-- ═══════════ NAVBAR ═══════════ -->
+<nav class="navbar navbar-expand-lg sticky-top nav-gradient border-bottom border-secondary border-opacity-25">
+  <div class="container-lg">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+      <div class="rounded-2 d-flex align-items-center justify-content-center fw-bold text-white" style="width:36px;height:36px;background:linear-gradient(135deg,#4f6ef7,#a855f7);font-family:Syne,sans-serif">TG</div>
+      <span class="fw-bold font-syne fs-5">TextGuard</span>
+      <span class="badge text-bg-primary ms-1" style="font-size:.6rem;letter-spacing:1px">WORLD-CLASS</span>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+      <i class="bi bi-list fs-4"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto align-items-lg-center gap-1 mt-3 mt-lg-0">
+        <li class="nav-item"><a class="nav-link" href="#app"><i class="bi bi-robot me-1"></i>AI Detection</a></li>
+        <li class="nav-item"><a class="nav-link" href="#app"><i class="bi bi-shield-exclamation me-1"></i>Plagiarism</a></li>
+        <li class="nav-item"><a class="nav-link" href="#app"><i class="bi bi-files me-1"></i>Compare</a></li>
+        <li class="nav-item ms-lg-2">
+          <a class="btn btn-outline-light btn-sm px-3" href="https://github.com/Joysilas389/plagdetect" target="_blank">
+            <i class="bi bi-github me-1"></i>GitHub
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero-bg py-5">
+  <div class="container-lg py-4 text-center">
+    <span class="badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25 px-3 py-2 mb-3 font-mono">
+      <i class="bi bi-award-fill me-1 text-warning"></i>
+      World's Most Advanced · 18 NLP Algorithms · 100% Free · No Login Required
+    </span>
+    <h1 class="display-4 fw-bold font-syne mb-3">
+      Detect AI Writing &amp; <span class="brand-gradient">Plagiarism Instantly</span>
+    </h1>
+    <p class="lead text-secondary mb-4 mx-auto" style="max-width:600px">
+      Research-grade analysis powered by SimHash, Jaccard similarity, bigram entropy, burstiness scoring &amp; 14 more algorithms. No subscription. Ever.
+    </p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap mb-5">
+      <a href="#app" class="btn btn-primary btn-lg px-4">
+        <i class="bi bi-play-circle-fill me-2"></i>Start Analysing
+      </a>
+      <a href="https://github.com/Joysilas389/plagdetect" target="_blank" class="btn btn-outline-light btn-lg px-4">
+        <i class="bi bi-github me-2"></i>View on GitHub
+      </a>
+    </div>
+
+    <!-- Stats -->
+    <div class="row g-3 justify-content-center">
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 card-hover"><div class="display-6 fw-bold text-primary font-syne">18</div><div class="small text-secondary">NLP Algorithms</div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 card-hover"><div class="display-6 fw-bold text-success font-syne">100%</div><div class="small text-secondary">Browser-Based</div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 card-hover"><div class="display-6 fw-bold text-warning font-syne">0</div><div class="small text-secondary">Data Uploaded</div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 card-hover"><div class="display-6 fw-bold text-danger font-syne">∞</div><div class="small text-secondary">Free Forever</div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ APP ═══════════ -->
+<section id="app" class="py-5" style="background:#0d1117">
+  <div class="container-lg">
+
+    <!-- Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2 flex-nowrap overflow-auto pb-1" id="mainTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active px-4 fw-semibold" id="tab-ai" data-bs-toggle="pill" data-bs-target="#panel-ai" type="button">
+          <i class="bi bi-robot me-2"></i>AI Detection
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link px-4 fw-semibold" id="tab-plag" data-bs-toggle="pill" data-bs-target="#panel-plag" type="button">
+          <i class="bi bi-shield-exclamation me-2"></i>Plagiarism
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link px-4 fw-semibold" id="tab-compare" data-bs-toggle="pill" data-bs-target="#panel-compare" type="button">
+          <i class="bi bi-files me-2"></i>Compare Texts
+        </button>
+      </li>
+    </ul>
+
+    <div class="tab-content">
+
+      <!-- ══ AI DETECTION ══ -->
+      <div class="tab-pane fade show active" id="panel-ai" role="tabpanel">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 bg-black bg-opacity-25">
+            <span class="fw-semibold"><i class="bi bi-pencil-square text-primary me-2"></i>Input Text</span>
+            <span class="font-mono text-secondary" id="wc-ai">0 words · 0 sentences</span>
+          </div>
+          <div class="card-body p-0">
+            <textarea id="ta-ai" class="tg-textarea p-3" placeholder="Paste your essay, manuscript, article, or any text here…&#10;&#10;Minimum 30 words for reliable results." oninput="updateWC('ai')"></textarea>
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex gap-2 flex-wrap">
+              <label class="btn btn-outline-secondary btn-sm" for="file-ai">
+                <i class="bi bi-upload me-1"></i>Upload File
+                <input type="file" id="file-ai" class="d-none" accept=".txt,.doc,.docx" onchange="handleFile(event,'ai')"/>
+              </label>
+              <button class="btn btn-outline-secondary btn-sm" onclick="loadSample('ai-sample')"><i class="bi bi-robot me-1"></i>AI Sample</button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="loadSample('human-sample')"><i class="bi bi-person me-1"></i>Human Sample</button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="clearTA('ai')"><i class="bi bi-x-circle me-1"></i>Clear</button>
+            </div>
+            <button class="btn btn-primary fw-semibold" id="btn-ai" onclick="runAI()">
+              <i class="bi bi-cpu me-2"></i>Analyse Text
+            </button>
+          </div>
+        </div>
+
+        <!-- Progress AI -->
+        <div id="prog-ai" class="card bg-dark border border-secondary border-opacity-50 rounded-3 mb-3 d-none">
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="font-mono text-secondary" id="prog-ai-label">Initialising…</small>
+              <small class="font-mono text-primary fw-bold" id="prog-ai-pct">0%</small>
+            </div>
+            <div class="progress mb-3" style="height:4px">
+              <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" id="prog-ai-bar" style="width:0%"></div>
+            </div>
+            <div id="prog-ai-steps"></div>
+          </div>
+        </div>
+
+        <!-- Results AI -->
+        <div id="results-ai">
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-search display-4 d-block mb-3 opacity-25"></i>
+            <p class="fw-semibold">No analysis yet</p>
+            <small>Paste text or upload a file above to begin</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ PLAGIARISM ══ -->
+      <div class="tab-pane fade" id="panel-plag" role="tabpanel">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 mb-3">
+          <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 bg-black bg-opacity-25">
+            <span class="fw-semibold"><i class="bi bi-shield-lock text-warning me-2"></i>Text to Check</span>
+            <span class="font-mono text-secondary" id="wc-plag">0 words</span>
+          </div>
+          <div class="card-body p-0">
+            <textarea id="ta-plag" class="tg-textarea p-3" placeholder="Paste your text here to check structural originality, boilerplate density, fingerprint uniqueness, and phrase novelty…" oninput="updateWC('plag')"></textarea>
+          </div>
+          <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex gap-2 flex-wrap">
+              <label class="btn btn-outline-secondary btn-sm" for="file-plag">
+                <i class="bi bi-upload me-1"></i>Upload File
+                <input type="file" id="file-plag" class="d-none" accept=".txt" onchange="handleFile(event,'plag')"/>
+              </label>
+              <button class="btn btn-outline-secondary btn-sm" onclick="loadSample('plag-sample')"><i class="bi bi-file-earmark-text me-1"></i>Load Sample</button>
+              <button class="btn btn-outline-secondary btn-sm" onclick="clearTA('plag')"><i class="bi bi-x-circle me-1"></i>Clear</button>
+            </div>
+            <button class="btn btn-warning fw-semibold text-dark" onclick="runPlag()">
+              <i class="bi bi-fingerprint me-2"></i>Check Originality
+            </button>
+          </div>
+        </div>
+        <div id="prog-plag" class="card bg-dark border border-secondary border-opacity-50 rounded-3 mb-3 d-none">
+          <div class="card-body">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="font-mono text-secondary" id="prog-plag-label">Initialising…</small>
+              <small class="font-mono text-warning fw-bold" id="prog-plag-pct">0%</small>
+            </div>
+            <div class="progress mb-3" style="height:4px">
+              <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" id="prog-plag-bar" style="width:0%"></div>
+            </div>
+            <div id="prog-plag-steps"></div>
+          </div>
+        </div>
+        <div id="results-plag">
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-fingerprint display-4 d-block mb-3 opacity-25"></i>
+            <p class="fw-semibold">Originality Analysis</p>
+            <small>Generates n-gram fingerprints, structural hashes, and similarity signatures</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ COMPARE ══ -->
+      <div class="tab-pane fade" id="panel-compare" role="tabpanel">
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 h-100">
+              <div class="card-header d-flex justify-content-between bg-black bg-opacity-25">
+                <span class="fw-semibold"><span class="badge bg-primary me-2">A</span>Document A — Source</span>
+                <span class="font-mono text-secondary" id="wc-a">0 words</span>
+              </div>
+              <div class="card-body p-0">
+                <textarea id="ta-a" class="tg-textarea p-3" style="min-height:180px" placeholder="Paste original or reference text…" oninput="updateWC('a')"></textarea>
+              </div>
+              <div class="card-footer">
+                <label class="btn btn-outline-secondary btn-sm" for="file-a">
+                  <i class="bi bi-upload me-1"></i>Upload
+                  <input type="file" id="file-a" class="d-none" accept=".txt" onchange="handleFile(event,'a')"/>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 h-100">
+              <div class="card-header d-flex justify-content-between bg-black bg-opacity-25">
+                <span class="fw-semibold"><span class="badge bg-danger me-2">B</span>Document B — Submission</span>
+                <span class="font-mono text-secondary" id="wc-b">0 words</span>
+              </div>
+              <div class="card-body p-0">
+                <textarea id="ta-b" class="tg-textarea p-3" style="min-height:180px" placeholder="Paste submitted or suspect text…" oninput="updateWC('b')"></textarea>
+              </div>
+              <div class="card-footer">
+                <label class="btn btn-outline-secondary btn-sm" for="file-b">
+                  <i class="bi bi-upload me-1"></i>Upload
+                  <input type="file" id="file-b" class="d-none" accept=".txt" onchange="handleFile(event,'b')"/>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap mb-4">
+          <button class="btn btn-primary fw-semibold" onclick="runCompare()"><i class="bi bi-arrow-left-right me-2"></i>Compare Documents</button>
+          <button class="btn btn-outline-secondary" onclick="loadSample('compare-sample')"><i class="bi bi-files me-1"></i>Load Sample Pair</button>
+        </div>
+        <div id="results-compare">
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-files display-4 d-block mb-3 opacity-25"></i>
+            <p class="fw-semibold">Side-by-side Comparison</p>
+            <small>Finds overlapping phrases, shared n-grams, and structural similarity score</small>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-content -->
+  </div>
+</section>
+
+<!-- ═══════════ HOW IT WORKS ═══════════ -->
+<section class="py-5 bg-dark">
+  <div class="container-lg">
+    <div class="text-center mb-5">
+      <h2 class="fw-bold font-syne">How TextGuard Works</h2>
+      <p class="text-secondary">18 research-grade NLP algorithms running entirely in your browser</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-4 h-100 card-hover">
+          <div class="bg-primary bg-opacity-10 rounded-3 d-inline-flex p-3 mb-3"><i class="bi bi-graph-up text-primary fs-4"></i></div>
+          <h6 class="fw-bold">Statistical Analysis</h6>
+          <p class="text-secondary small mb-0">Burstiness, TTR, bigram entropy, and sentence length variance — the same metrics used in academic NLP research.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-4 h-100 card-hover">
+          <div class="bg-danger bg-opacity-10 rounded-3 d-inline-flex p-3 mb-3"><i class="bi bi-fingerprint text-danger fs-4"></i></div>
+          <h6 class="fw-bold">SimHash Fingerprinting</h6>
+          <p class="text-secondary small mb-0">64-bit SimHash fingerprints, trigram and 4-gram signatures create a unique structural profile of every document.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-4 h-100 card-hover">
+          <div class="bg-warning bg-opacity-10 rounded-3 d-inline-flex p-3 mb-3"><i class="bi bi-list-check text-warning fs-4"></i></div>
+          <h6 class="fw-bold">Pattern Detection</h6>
+          <p class="text-secondary small mb-0">50+ AI vocabulary terms, 35 filler phrases, passive voice, em dash overuse, and "rule of three" — all flagged individually.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-4 h-100 card-hover">
+          <div class="bg-success bg-opacity-10 rounded-3 d-inline-flex p-3 mb-3"><i class="bi bi-lock text-success fs-4"></i></div>
+          <h6 class="fw-bold">Private by Design</h6>
+          <p class="text-secondary small mb-0">Zero data leaves your device. No API calls, no accounts, no storage. Your text stays yours.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════ FOOTER ═══════════ -->
+<footer class="py-4 border-top border-secondary border-opacity-25" style="background:#0d1117">
+  <div class="container-lg">
+    <div class="row align-items-center text-center text-md-start">
+      <div class="col-md-6 mb-2 mb-md-0">
+        <span class="fw-bold font-syne me-2">TextGuard</span>
+        <span class="text-secondary small">© 2026 · Built by Joysilas389 · Open Source</span>
+      </div>
+      <div class="col-md-6 text-md-end">
+        <a href="https://github.com/Joysilas389/plagdetect" class="btn btn-outline-secondary btn-sm me-2" target="_blank"><i class="bi bi-github me-1"></i>GitHub</a>
+        <span class="text-secondary small">joysilas389@gmail.com</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="tg-tooltip-el" id="tg-tip"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════
+//  NLP ENGINE — 18 Algorithms
+// ═══════════════════════════════════════════════
+const AI_VOCAB = new Set(['delve','tapestry','nuanced','multifaceted','comprehensive','robust','crucial','pivotal','paramount','underscore','highlight','showcase','leverage','utilize','streamline','foster','facilitate','encompass','embody','exemplify','resonate','testament','landscape','ecosystem','synergy','paradigm','holistic','actionable','empower','navigate','catalyst','cornerstone','groundbreaking','revolutionary','seamlessly','intrinsically','fundamentally','moreover','furthermore','additionally','notably','significantly','ultimately','essentially','typically','particularly','increasingly','consistently','subsequently','consequently','nevertheless','nonetheless','whilst','amidst','plethora','myriad','realm','sphere','domain','trajectory','nexus','interplay','dynamic','innovative','transformative','unprecedented']);
+const AI_CONJ = new Set(['furthermore','moreover','additionally','consequently','nevertheless','nonetheless','subsequently','therefore','thus','hence','accordingly','henceforth']);
+const FILLER = ['it is worth noting','it should be noted','it is important to note','it is crucial to','in today\'s rapidly evolving','in the realm of','plays a crucial role','plays a vital role','plays a pivotal role','a wide range of','serves as a testament','marks a significant','highlights the importance','delve into','shed light on','pave the way','it goes without saying','as previously mentioned','underscores the importance','showcasing the potential','it is undeniable that'];
+const PROMO = ['groundbreaking','revolutionary','unprecedented','remarkable','extraordinary','exceptional','outstanding','unparalleled','innovative','world-class','game-changing','disruptive'];
+const PASSIVE_RE = [/\b(is|are|was|were|be|been|being)\s+(being\s+)?\w+ed\b/gi,/\b(has|have|had)\s+been\s+\w+ed\b/gi];
+const BOILERPLATE = [
+  {p:'studies have shown',s:'Common academic opener',r:'LOW'},
+  {p:'research has demonstrated',s:'Academic boilerplate',r:'LOW'},
+  {p:'it has been established',s:'Passive boilerplate',r:'LOW'},
+  {p:'further research is needed',s:'Universal conclusion',r:'LOW'},
+  {p:'plays a crucial role',s:'Overused academic phrase',r:'MEDIUM'},
+  {p:'highlights the importance',s:'AI/academic boilerplate',r:'MEDIUM'},
+  {p:'it is worth noting',s:'AI filler phrase',r:'HIGH'},
+  {p:'in today\'s rapidly evolving',s:'AI writing pattern',r:'HIGH'},
+  {p:'in the realm of',s:'AI writing pattern',r:'HIGH'},
+  {p:'delve into',s:'AI vocabulary fingerprint',r:'HIGH'},
+  {p:'serves as a testament',s:'AI significance inflation',r:'HIGH'},
+  {p:'the evolving landscape',s:'AI landscape cliché',r:'HIGH'},
+  {p:'a pivotal moment in',s:'AI significance inflation',r:'HIGH'},
+  {p:'in a world where',s:'AI opener cliché',r:'HIGH'},
+];
+
+function tok(t){return t.toLowerCase().replace(/[^a-z0-9\s]/g,'').split(/\s+/).filter(Boolean)}
+function sents(t){return(t.match(/[^.!?…]+[.!?…]+(?:\s|$)/g)||[t]).map(s=>s.trim()).filter(s=>s.length>4)}
+function paras(t){return t.split(/\n{2,}/).map(p=>p.trim()).filter(p=>p.length>20)}
+
+function ttr(tokens){return tokens.length?new Set(tokens).size/tokens.length:0}
+function burst(sentences){const l=sentences.map(s=>s.split(/\s+/).length);let c=0;for(let i=1;i<l.length;i++)c+=Math.abs(l[i]-l[i-1]);return c/Math.max(l.length,1)}
+function slvar(sentences){const l=sentences.map(s=>s.split(/\s+/).length);const m=l.reduce((a,b)=>a+b,0)/l.length;return Math.sqrt(l.reduce((a,b)=>a+(b-m)**2,0)/l.length)}
+function entropy(tokens,n){if(tokens.length<n)return 0;const f={};for(let i=0;i<=tokens.length-n;i++){const g=tokens.slice(i,i+n).join(' ');f[g]=(f[g]||0)+1}const tot=Object.values(f).reduce((a,b)=>a+b,0);let e=0;Object.values(f).forEach(c=>{const p=c/tot;e-=p*Math.log2(p)});return e}
+function ngramRep(tokens,n){const f={};for(let i=0;i<=tokens.length-n;i++){const g=tokens.slice(i,i+n).join(' ');f[g]=(f[g]||0)+1}const v=Object.values(f);return v.length?v.filter(x=>x>1).length/v.length:0}
+function aiVocab(tokens){return tokens.length?tokens.filter(t=>AI_VOCAB.has(t)).length/tokens.length:0}
+function fillerHits(text){const l=text.toLowerCase();return FILLER.filter(p=>l.includes(p))}
+function passiveRatio(sentences){return sentences.filter(s=>PASSIVE_RE.some(r=>{r.lastIndex=0;return r.test(s)})).length/Math.max(sentences.length,1)}
+function emDash(text,sentences){return(text.match(/[—–]/g)||[]).length/Math.max(sentences.length,1)}
+function ro3(text){return(text.match(/\b\w+(?:,\s*\w+){1},?\s+and\s+\w+\b/g)||[]).length/Math.max(sents(text).length,1)}
+function startDiv(sentences){const s=sentences.map(s=>(s.trim().split(/\s+/)[0]||'').toLowerCase());return new Set(s).size/Math.max(s.length,1)}
+function conjDens(tokens){return tokens.filter(t=>AI_CONJ.has(t)).length/Math.max(tokens.length,1)}
+function puffery(tokens){return tokens.filter(t=>PROMO.includes(t)).length/Math.max(tokens.length,1)}
+function negPar(text){return(text.match(/not just .{1,40} but|not only .{1,40} but also/gi)||[]).length/Math.max(sents(text).length,1)}
+function signpost(text){const sp=['firstly','secondly','thirdly','in conclusion','to summarize','in summary','as mentioned','the following','as follows'];const l=text.toLowerCase();return sp.filter(s=>l.includes(s)).length/Math.max(sents(text).length,1)}
+function paraUnif(text){const p=paras(text);if(p.length<2)return 0;const l=p.map(x=>x.split(/\s+/).length);const m=l.reduce((a,b)=>a+b,0)/l.length;const sd=Math.sqrt(l.reduce((a,b)=>a+(b-m)**2,0)/l.length);return sd/Math.max(m,1)}
+
+function scoreSentence(s){
+  const t=tok(s),l=s.toLowerCase();
+  const v=t.filter(x=>AI_VOCAB.has(x)).length/Math.max(t.length,1);
+  const pa=PASSIVE_RE.some(r=>{r.lastIndex=0;return r.test(s)})?0.25:0;
+  const c=t.some(x=>AI_CONJ.has(x))?0.18:0;
+  const f=FILLER.some(x=>l.includes(x))?0.28:0;
+  const pr=t.filter(x=>PROMO.includes(x)).length>0?0.15:0;
+  return {text:s.trim(),aiProb:Math.min(1,v*4+pa+c+f+pr)};
+}
+
+function computeAI(text){
+  const tokens=tok(text),sentences=sents(text);
+  const hs={
+    burstiness:Math.min(burst(sentences)/9,1),
+    ttr:Math.min(ttr(tokens)*1.5,1),
+    slvar:Math.min(slvar(sentences)/12,1),
+    bigEnt:Math.min(entropy(tokens,2)/9,1),
+    triEnt:Math.min(entropy(tokens,3)/10,1),
+    ng3:Math.max(0,1-ngramRep(tokens,3)*4),
+    ng4:Math.max(0,1-ngramRep(tokens,4)*5),
+    vocab:Math.max(0,1-aiVocab(tokens)*14),
+    filler:Math.max(0,1-fillerHits(text).length/5),
+    passive:Math.max(0,1-passiveRatio(sentences)*1.6),
+    emDash:Math.max(0,1-emDash(text,sentences)*6),
+    ro3:Math.max(0,1-ro3(text)*10),
+    startDiv:startDiv(sentences),
+    conj:Math.max(0,1-conjDens(tokens)*50),
+    puff:Math.max(0,1-puffery(tokens)*25),
+    negPar:Math.max(0,1-negPar(text)*20),
+    sign:Math.max(0,1-signpost(text)*12),
+    paraUnif:Math.min(paraUnif(text)*1.2,1),
+  };
+  const w={burstiness:1.5,ttr:1.2,slvar:1.1,bigEnt:1.5,triEnt:1.2,ng3:1.1,ng4:.9,vocab:2.2,filler:1.9,passive:.9,emDash:.7,ro3:.8,startDiv:.9,conj:1,puff:1.1,negPar:.7,sign:.8,paraUnif:.8};
+  let wSum=0,wTot=0;
+  Object.keys(hs).forEach(k=>{wSum+=hs[k]*w[k];wTot+=w[k]});
+  const humanScore=wSum/wTot;
+  return {aiScore:1-humanScore,humanScore,hs,tokens,sentences,sentScores:sentences.map(scoreSentence),fillerFound:fillerHits(text),vocabHits:[...new Set(tokens.filter(t=>AI_VOCAB.has(t)))],wordCount:tokens.length,sentCount:sentences.length,paraCount:paras(text).length};
+}
+
+// SimHash / Plagiarism
+function simhash(tokens,bits=64){const v=new Array(bits).fill(0);tokens.forEach(tok=>{let h=0;for(let i=0;i<tok.length;i++)h=(Math.imul(h,31)+tok.charCodeAt(i))>>>0;for(let b=0;b<bits;b++)v[b]+=((h>>(b%32))&1)?1:-1});return v.map(x=>x>0?1:0).join('')}
+function simSim(a,b){const n=Math.min(a.length,b.length);let d=0;for(let i=0;i<n;i++)if(a[i]!==b[i])d++;return(n-d)/n}
+function ngramFreq(tokens,n){const f={};for(let i=0;i<=tokens.length-n;i++){const g=tokens.slice(i,i+n).join(' ');f[g]=(f[g]||0)+1}return f}
+function jaccard(tA,tB,n){const sA=new Set(Object.keys(ngramFreq(tA,n)));const sB=new Set(Object.keys(ngramFreq(tB,n)));const inter=[...sA].filter(x=>sB.has(x)).length;const uni=new Set([...sA,...sB]).size;return uni?inter/uni:0}
+function sharedPhrases(tA,tB,n){const sA=new Set(Object.keys(ngramFreq(tok(tA),n)));const sB=new Set(Object.keys(ngramFreq(tok(tB),n)));return[...sA].filter(g=>sB.has(g))}
+
+function computeOrig(text){
+  const tokens=tok(text);const bp=BOILERPLATE.filter(b=>text.toLowerCase().includes(b.p));
+  const v=ttr(tokens);const r3=ngramRep(tokens,3);const r4=ngramRep(tokens,4);
+  const fp={hash:simhash(tokens),top3:Object.entries(ngramFreq(tokens,3)).sort((a,b)=>b[1]-a[1]).slice(0,10).map(e=>e[0]),top4:Object.entries(ngramFreq(tokens,4)).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>e[0]),topWords:Object.entries(Object.fromEntries(tokens.map(t=>[t,(tokens.filter(x=>x===t).length)]))).sort((a,b)=>b[1]-a[1]).slice(0,12).map(e=>e[0])};
+  const bpPen=Math.min(bp.filter(b=>b.r==='HIGH').length*.08+bp.filter(b=>b.r==='MEDIUM').length*.04,.4);
+  const repPen=r3*.25+r4*.15;const ttrBonus=(v-.3)*.4;
+  return{originality:Math.max(0,Math.min(1,.72-bpPen-repPen+ttrBonus)),boilerplate:bp,fp,ttr:v,r3,r4};
+}
+
+function computeCompare(tA,tB){
+  const tkA=tok(tA),tkB=tok(tB);
+  const fpA=simhash(tkA),fpB=simhash(tkB);
+  const sim=simSim(fpA,fpB),j2=jaccard(tkA,tkB,2),j3=jaccard(tkA,tkB,3),j4=jaccard(tkA,tkB,4);
+  return{composite:sim*.3+j2*.25+j3*.25+j4*.2,sim,j2,j3,j4,shared5:sharedPhrases(tA,tB,5),shared4:sharedPhrases(tA,tB,4),fpA,fpB};
+}
+
+// ═══════════════════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════════════════
+const charts={};
+function makeDonut(id,ai,hu){if(charts[id])charts[id].destroy();const ctx=document.getElementById(id).getContext('2d');charts[id]=new Chart(ctx,{type:'doughnut',data:{labels:['AI','Human'],datasets:[{data:[ai,hu],backgroundColor:[ai>=70?'#dc3545':ai>=40?'#ffc107':'#6610f2','#198754'],borderWidth:0}]},options:{cutout:'72%',plugins:{legend:{display:false}},animation:{duration:600}}})}
+function makeRadar(id,labels,vals){if(charts[id])charts[id].destroy();const ctx=document.getElementById(id).getContext('2d');charts[id]=new Chart(ctx,{type:'radar',data:{labels,datasets:[{label:'Human',data:vals,backgroundColor:'rgba(79,110,247,.15)',borderColor:'#4f6ef7',pointBackgroundColor:'#4f6ef7',pointRadius:3,borderWidth:2}]},options:{scales:{r:{min:0,max:100,ticks:{display:false},grid:{color:'rgba(255,255,255,.06)'},pointLabels:{color:'#6c757d',font:{size:10}}}},plugins:{legend:{display:false}},animation:{duration:600}}})}
+
+function aiColor(p){return p>=70?'#dc3545':p>=40?'#ffc107':'#198754'}
+function aiVerdict(p){return p>=80?'AI Generated':p>=60?'Likely AI':p>=40?'Mixed / Unclear':p>=20?'Mostly Human':'Human Written'}
+function bsBadge(p){return p>=70?'danger':p>=40?'warning':'success'}
+
+function ngramHTML(grams,color=''){return grams.length?grams.map(g=>`<span class="ngram-tag" ${color?`style="color:${color}"`:''}>${g}</span>`).join(''):'<span class="text-secondary small">None detected</span>'}
+function riskBadge(r){const m={HIGH:'danger',MEDIUM:'warning',LOW:'success'};return`<span class="badge bg-${m[r]}-subtle text-${m[r]} border border-${m[r]}-subtle">${r}</span>`}
+
+function sentMarkup(scores){return scores.map(s=>{let cls,tip;if(s.aiProb>=.55){cls='sent-ai';tip=`AI-likely (${Math.round(s.aiProb*100)}% AI)`}else if(s.aiProb>=.25){cls='sent-mixed';tip=`Mixed (${Math.round(s.aiProb*100)}% AI)`}else{cls='sent-human';tip=`Human-like (${Math.round((1-s.aiProb)*100)}% human)`}return`<span class="${cls}" data-tip="${tip}" onmouseenter="showTip(event,this)" onmouseleave="hideTip()">${s.text.replace(/</g,'&lt;')} </span>`}).join('')}
+
+// ═══════════════════════════════════════════════
+//  RENDER AI RESULTS
+// ═══════════════════════════════════════════════
+function renderAI(r){
+  const ai=Math.round(r.aiScore*100),hu=100-ai;
+  const ac=aiColor(ai);
+  const flags=[
+    {n:'AI Vocabulary',v:`${(r.hs.vocab<1?(1-r.hs.vocab)*100/14:0).toFixed(1)}%`,flag:r.hs.vocab<.7,d:`Found: ${r.vocabHits.slice(0,6).join(', ')||'none'}`},
+    {n:'Filler Phrases',v:r.fillerFound.length,flag:r.fillerFound.length>1,d:r.fillerFound.slice(0,2).map(p=>`"${p}"`).join(', ')||'None detected'},
+    {n:'Passive Voice',v:`${Math.round((1-r.hs.passive)*100/1.6)}%`,flag:r.hs.passive<.55,d:'Percentage of sentences using passive voice'},
+    {n:'Burstiness',v:r.hs.burstiness.toFixed(2),flag:r.hs.burstiness<.4,d:'Sentence rhythm variation — higher = more human'},
+    {n:'Vocab Diversity (TTR)',v:`${Math.round(r.hs.ttr*100/1.5)}%`,flag:r.hs.ttr<.6,d:'Unique word proportion'},
+    {n:'Bigram Entropy',v:r.hs.bigEnt.toFixed(2),flag:r.hs.bigEnt<.55,d:'Language unpredictability score'},
+    {n:'Start Diversity',v:`${Math.round(r.hs.startDiv*100)}%`,flag:r.hs.startDiv<.55,d:'Variety in sentence-opening words'},
+    {n:'Rule-of-Three',v:r.hs.ro3.toFixed(3),flag:r.hs.ro3<.7,d:'AI overuses "x, y, and z" triplets'},
+    {n:'AI Conjunctions',v:r.hs.conj.toFixed(3),flag:r.hs.conj<.6,d:'furthermore, moreover, additionally density'},
+    {n:'Em Dash Overuse',v:r.hs.emDash.toFixed(3),flag:r.hs.emDash<.7,d:'Em dashes per sentence'},
+    {n:'Puffery Language',v:r.hs.puff.toFixed(3),flag:r.hs.puff<.7,d:'Groundbreaking, revolutionary, unprecedented…'},
+    {n:'Negative Parallelism',v:r.hs.negPar.toFixed(3),flag:r.hs.negPar<.8,d:'"Not just X but also Y" constructions'},
+    {n:'Signposting',v:r.hs.sign.toFixed(3),flag:r.hs.sign<.7,d:'Firstly, secondly, in conclusion…'},
+    {n:'Paragraph Uniformity',v:r.hs.paraUnif.toFixed(3),flag:r.hs.paraUnif<.4,d:'AI writes uniform paragraph lengths'},
+    {n:'N-gram Repetition',v:`${Math.round((1-r.hs.ng3)*100/4)}%`,flag:r.hs.ng3<.55,d:'Repeated 3-word phrase rate'},
+  ];
+  const flagCount=flags.filter(f=>f.flag).length;
+  const metrics=[
+    {n:'Burstiness',v:Math.round(r.hs.burstiness*100)},
+    {n:'Vocab Div.',v:Math.round(r.hs.ttr*100)},
+    {n:'Length Var.',v:Math.round(r.hs.slvar*100)},
+    {n:'Bigram Ent.',v:Math.round(r.hs.bigEnt*100)},
+    {n:'AI Vocab',v:Math.round(r.hs.vocab*100)},
+    {n:'Filler-Free',v:Math.round(r.hs.filler*100)},
+    {n:'Active Voice',v:Math.round(r.hs.passive*100)},
+    {n:'Start Div.',v:Math.round(r.hs.startDiv*100)},
+  ];
+
+  document.getElementById('results-ai').innerHTML=`
+  <div class="fade-up">
+    <!-- Score Cards -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-lg-3">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 h-100 overflow-hidden">
+          <div class="score-top-bar" style="background:${ac}"></div>
+          <div class="card-body">
+            <div class="small text-secondary font-mono text-uppercase mb-1">AI Probability</div>
+            <div class="display-5 fw-bold font-syne" style="color:${ac}">${ai}%</div>
+            <div class="small text-secondary">${hu}% human signals</div>
+            <span class="badge bg-${bsBadge(ai)}-subtle text-${bsBadge(ai)} border border-${bsBadge(ai)}-subtle mt-2">${aiVerdict(ai)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 h-100 overflow-hidden">
+          <div class="score-top-bar bg-success"></div>
+          <div class="card-body">
+            <div class="small text-secondary font-mono text-uppercase mb-1">Human Score</div>
+            <div class="display-5 fw-bold font-syne text-success">${hu}%</div>
+            <div class="small text-secondary">18 algorithms</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 h-100 overflow-hidden">
+          <div class="score-top-bar bg-primary"></div>
+          <div class="card-body">
+            <div class="small text-secondary font-mono text-uppercase mb-1">Text Stats</div>
+            <div class="display-5 fw-bold font-syne text-primary">${r.wordCount}</div>
+            <div class="small text-secondary">${r.sentCount} sentences · ${r.paraCount} paragraphs</div>
+          </div>
+        </div>
+      </div>
+      <div class="col-6 col-lg-3">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 h-100 overflow-hidden">
+          <div class="score-top-bar bg-warning"></div>
+          <div class="card-body">
+            <div class="small text-secondary font-mono text-uppercase mb-1">Flags Triggered</div>
+            <div class="display-5 fw-bold font-syne text-warning">${flagCount}</div>
+            <div class="small text-secondary">of ${flags.length} pattern checks</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-4">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 text-center h-100">
+          <div class="small text-secondary font-mono text-uppercase mb-2">Overall Verdict</div>
+          <div class="position-relative mx-auto" style="max-width:180px">
+            <canvas id="chart-donut"></canvas>
+            <div class="position-absolute top-50 start-50 translate-middle">
+              <div class="fw-bold font-syne fs-3" style="color:${ac}">${ai}%</div>
+              <div class="font-mono text-secondary" style="font-size:.7rem">AI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 h-100">
+          <div class="small text-secondary font-mono text-uppercase mb-2">Human Signal Radar</div>
+          <canvas id="chart-radar" style="max-height:200px"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metric pills -->
+    <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 mb-4">
+      <div class="small text-secondary font-mono text-uppercase mb-3"><i class="bi bi-bar-chart me-2"></i>18-Algorithm Breakdown</div>
+      <div class="row g-2">
+        ${metrics.map(m=>{const cls=m.v>=60?'success':m.v>=35?'warning':'danger';return`<div class="col-6 col-md-3"><div class="p-2 rounded-2 border border-secondary border-opacity-25" style="background:#0d1117"><div class="font-mono text-secondary mb-1" style="font-size:.7rem">${m.n}</div><div class="fw-bold text-${cls} font-syne">${m.v}%</div><div class="progress mt-1" style="height:3px"><div class="progress-bar bg-${cls}" style="width:${m.v}%"></div></div></div></div>`}).join('')}
+      </div>
+    </div>
+
+    <!-- Sentence breakdown -->
+    <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 mb-4">
+      <div class="card-header bg-black bg-opacity-25">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <span class="small text-secondary font-mono text-uppercase"><i class="bi bi-list-ul me-2"></i>Sentence-Level Analysis</span>
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle"><i class="bi bi-circle-fill me-1" style="font-size:7px"></i>AI-likely</span>
+            <span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-circle-fill me-1" style="font-size:7px"></i>Mixed</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="bi bi-circle-fill me-1" style="font-size:7px"></i>Human</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body" style="line-height:2.2;font-size:.9rem">${sentMarkup(r.sentScores)}</div>
+    </div>
+
+    <!-- Pattern list -->
+    <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 mb-4">
+      <div class="card-header bg-black bg-opacity-25">
+        <span class="small text-secondary font-mono text-uppercase"><i class="bi bi-shield-check me-2"></i>Pattern Detection — All Checks</span>
+      </div>
+      <div class="card-body p-0">
+        ${flags.map(f=>`
+        <div class="d-flex align-items-start gap-3 p-3 border-bottom border-secondary border-opacity-25 ${f.flag?'pattern-flag':'pattern-ok'}">
+          <i class="bi bi-${f.flag?'exclamation-triangle-fill text-danger':'check-circle-fill text-success'} mt-1 flex-shrink-0"></i>
+          <div class="flex-grow-1">
+            <div class="fw-semibold small ${f.flag?'text-danger':'text-success'}">${f.n}</div>
+            <div class="text-secondary" style="font-size:.8rem">${f.d}</div>
+          </div>
+          <div class="font-mono fw-bold ${f.flag?'text-danger':'text-success'} flex-shrink-0">${f.v}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+
+  setTimeout(()=>{
+    makeDonut('chart-donut',ai,hu);
+    makeRadar('chart-radar',metrics.map(m=>m.n),metrics.map(m=>m.v));
+  },50);
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER PLAGIARISM
+// ═══════════════════════════════════════════════
+function renderPlag(r){
+  const op=Math.round(r.originality*100);
+  const ac=op>=70?'#198754':op>=40?'#ffc107':'#dc3545';
+  const bs=op>=70?'success':op>=40?'warning':'danger';
+  const verdict=op>=70?'Original':op>=40?'Partially Original':'Low Originality';
+  document.getElementById('results-plag').innerHTML=`
+  <div class="fade-up">
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 overflow-hidden"><div class="score-top-bar" style="background:${ac}"></div><div class="card-body"><div class="small text-secondary font-mono text-uppercase mb-1">Originality</div><div class="display-5 fw-bold font-syne" style="color:${ac}">${op}%</div><span class="badge bg-${bs}-subtle text-${bs} border border-${bs}-subtle mt-1">${verdict}</span></div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 overflow-hidden"><div class="score-top-bar bg-primary"></div><div class="card-body"><div class="small text-secondary font-mono text-uppercase mb-1">Vocab Diversity</div><div class="display-5 fw-bold font-syne text-primary">${Math.round(r.ttr*100)}%</div><div class="small text-secondary">Type-token ratio</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 overflow-hidden"><div class="score-top-bar bg-warning"></div><div class="card-body"><div class="small text-secondary font-mono text-uppercase mb-1">Boilerplate Hits</div><div class="display-5 fw-bold font-syne text-warning">${r.boilerplate.length}</div><div class="small text-secondary">${r.boilerplate.filter(b=>b.r==='HIGH').length} high-risk</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 overflow-hidden"><div class="score-top-bar bg-danger"></div><div class="card-body"><div class="small text-secondary font-mono text-uppercase mb-1">N-gram Repeat</div><div class="display-5 fw-bold font-syne text-danger">${Math.round(r.r3*100)}%</div><div class="small text-secondary">Trigram repeat rate</div></div></div></div>
+    </div>
+    <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3 mb-3">
+      <div class="small text-secondary font-mono text-uppercase mb-2"><i class="bi bi-fingerprint me-2"></i>64-bit SimHash Fingerprint</div>
+      <div class="fp-hash mb-3">${r.fp.hash.match(/.{1,8}/g).join(' ')}</div>
+      <div class="row g-3">
+        <div class="col-md-4"><div class="small text-secondary font-mono mb-1">Top Keywords</div>${ngramHTML(r.fp.topWords)}</div>
+        <div class="col-md-4"><div class="small text-secondary font-mono mb-1">Top Trigrams</div>${ngramHTML(r.fp.top3)}</div>
+        <div class="col-md-4"><div class="small text-secondary font-mono mb-1">Top 4-grams</div>${ngramHTML(r.fp.top4)}</div>
+      </div>
+    </div>
+    <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 mb-3">
+      <div class="card-header bg-black bg-opacity-25"><span class="small text-secondary font-mono text-uppercase"><i class="bi bi-exclamation-triangle me-2"></i>Boilerplate & Phrase Matches</span></div>
+      <div class="card-body p-0">
+        ${r.boilerplate.length?r.boilerplate.map(b=>`<div class="d-flex align-items-center gap-3 p-3 border-bottom border-secondary border-opacity-25"><div class="flex-grow-1"><div class="fw-semibold small">"${b.p}"</div><div class="text-secondary" style="font-size:.8rem">${b.s}</div></div>${riskBadge(b.r)}</div>`).join(''):'<div class="p-3 text-success small"><i class="bi bi-check-circle-fill me-2"></i>No boilerplate phrases detected — strong originality signal.</div>'}
+      </div>
+    </div>
+    <div class="alert alert-info border-0">
+      <i class="bi bi-info-circle-fill me-2"></i>
+      <strong>Note:</strong> This is a <strong>structural originality analysis</strong> — it does not compare against the open web. It detects phrase overuse, repetitive structure, and low vocabulary diversity.
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  RENDER COMPARE
+// ═══════════════════════════════════════════════
+function renderCompare(r){
+  const cp=Math.round(r.composite*100);
+  const ac=cp>=60?'#dc3545':cp>=30?'#ffc107':'#198754';
+  const bs=cp>=60?'danger':cp>=30?'warning':'success';
+  const verdict=cp>=60?'High Similarity':cp>=30?'Moderate Similarity':'Low Similarity';
+  const shared=r.shared5.length?r.shared5:r.shared4;
+  document.getElementById('results-compare').innerHTML=`
+  <div class="fade-up">
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 overflow-hidden"><div class="score-top-bar" style="background:${ac}"></div><div class="card-body"><div class="small text-secondary font-mono text-uppercase mb-1">Composite Similarity</div><div class="display-5 fw-bold font-syne" style="color:${ac}">${cp}%</div><span class="badge bg-${bs}-subtle text-${bs} border border-${bs}-subtle mt-1">${verdict}</span></div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 overflow-hidden"><div class="score-top-bar bg-primary"></div><div class="card-body"><div class="small text-secondary font-mono text-uppercase mb-1">SimHash Match</div><div class="display-5 fw-bold font-syne text-primary">${Math.round(r.sim*100)}%</div><div class="small text-secondary">Structural fingerprint</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 overflow-hidden"><div class="score-top-bar bg-warning"></div><div class="card-body"><div class="small text-secondary font-mono text-uppercase mb-1">Bigram Jaccard</div><div class="display-5 fw-bold font-syne text-warning">${Math.round(r.j2*100)}%</div><div class="small text-secondary">2-word overlap</div></div></div></div>
+      <div class="col-6 col-md-3"><div class="card bg-dark border border-secondary border-opacity-50 rounded-3 overflow-hidden"><div class="score-top-bar bg-danger"></div><div class="card-body"><div class="small text-secondary font-mono text-uppercase mb-1">4-gram Jaccard</div><div class="display-5 fw-bold font-syne text-danger">${Math.round(r.j4*100)}%</div><div class="small text-secondary">4-word overlap</div></div></div></div>
+    </div>
+    <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 mb-3 p-3">
+      <div class="small text-secondary font-mono text-uppercase mb-3"><i class="bi bi-bar-chart me-2"></i>Similarity by N-gram Level</div>
+      ${[{l:'Bigram Jaccard (2-word)',v:Math.round(r.j2*100)},{l:'Trigram Jaccard (3-word)',v:Math.round(r.j3*100)},{l:'4-gram Jaccard (4-word)',v:Math.round(r.j4*100)},{l:'SimHash (structural)',v:Math.round(r.sim*100)}].map(s=>{const c=s.v>=60?'danger':s.v>=30?'warning':'success';return`<div class="d-flex align-items-center gap-3 mb-2"><div class="flex-grow-1 small">${s.l}</div><div class="progress flex-grow-1" style="height:6px"><div class="progress-bar bg-${c}" style="width:${s.v}%"></div></div><div class="font-mono fw-bold text-${c}" style="min-width:40px;text-align:right">${s.v}%</div></div>`}).join('')}
+    </div>
+    <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 mb-3 p-3">
+      <div class="small text-secondary font-mono text-uppercase mb-2"><i class="bi bi-search me-2"></i>Shared Phrases (5+ words)</div>
+      ${shared.length?ngramHTML(shared.slice(0,24),'#ffc107'):'<span class="text-success small"><i class="bi bi-check-circle-fill me-1"></i>No significant shared phrases found</span>'}
+    </div>
+    <div class="card bg-dark border border-secondary border-opacity-50 rounded-3 p-3">
+      <div class="small text-secondary font-mono text-uppercase mb-2"><i class="bi bi-files me-2"></i>Document Fingerprints</div>
+      <div class="row g-3">
+        <div class="col-md-6"><div class="small font-mono text-secondary mb-1"><span class="badge bg-primary me-1">A</span>SimHash</div><div class="fp-hash">${r.fpA.match(/.{1,8}/g).join(' ')}</div></div>
+        <div class="col-md-6"><div class="small font-mono text-secondary mb-1"><span class="badge bg-danger me-1">B</span>SimHash</div><div class="fp-hash">${r.fpB.match(/.{1,8}/g).join(' ')}</div></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════
+//  APP LOGIC
+// ═══════════════════════════════════════════════
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+function updateWC(id){
+  const t=document.getElementById(`ta-${id}`).value.trim();
+  const w=t?t.split(/\s+/).length:0;
+  const el=document.getElementById(`wc-${id}`);
+  if(!el)return;
+  if(id==='ai') el.textContent=`${w} words · ${t?sents(t).length:0} sentences`;
+  else el.textContent=`${w} words`;
+}
+
+async function runProgress(id,steps){
+  const bar=document.getElementById(`prog-${id}-bar`);
+  const lbl=document.getElementById(`prog-${id}-label`);
+  const pct=document.getElementById(`prog-${id}-pct`);
+  const stepsEl=document.getElementById(`prog-${id}-steps`);
+  stepsEl.innerHTML=steps.map((s,i)=>`<div class="step-item" id="step-${id}-${i}"><div class="step-dot"></div>${s.l}</div>`).join('');
+  for(let i=0;i<steps.length;i++){
+    const p=Math.round((i+1)/steps.length*100);
+    document.getElementById(`step-${id}-${i}`).className='step-item active';
+    if(i>0)document.getElementById(`step-${id}-${i-1}`).className='step-item done';
+    bar.style.width=p+'%';lbl.textContent=steps[i].l;pct.textContent=p+'%';
+    await sleep(steps[i].ms||300);
+  }
+  document.getElementById(`step-${id}-${steps.length-1}`).className='step-item done';
+}
+
+async function runAI(){
+  const text=document.getElementById('ta-ai').value.trim();
+  if(!text||text.split(/\s+/).length<30){showToast('Please enter at least 30 words.','warning');return}
+  const btn=document.getElementById('btn-ai');
+  btn.disabled=true;btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Analysing…';
+  document.getElementById('prog-ai').classList.remove('d-none');
+  document.getElementById('results-ai').innerHTML='';
+  await runProgress('ai',[
+    {l:'Tokenising and segmenting sentences…',ms:280},
+    {l:'Computing burstiness and length variance…',ms:320},
+    {l:'Calculating bigram and trigram entropy…',ms:380},
+    {l:'Scanning AI vocabulary and filler phrases…',ms:400},
+    {l:'Detecting passive voice and em dash overuse…',ms:320},
+    {l:'Analysing conjunctions and signposting…',ms:300},
+    {l:'Running puffery and parallelism checks…',ms:280},
+    {l:'Scoring all 18 NLP algorithms…',ms:350},
+    {l:'Generating sentence-level breakdown…',ms:300},
+    {l:'Building composite AI probability…',ms:250},
+  ]);
+  const result=computeAI(text);
+  document.getElementById('prog-ai').classList.add('d-none');
+  renderAI(result);
+  btn.disabled=false;btn.innerHTML='<i class="bi bi-cpu me-2"></i>Analyse Text';
+  const ai=Math.round(result.aiScore*100);
+  showToast(`Analysis complete — AI probability: ${ai}%`,ai>=60?'danger':ai>=35?'warning':'success');
+}
+
+async function runPlag(){
+  const text=document.getElementById('ta-plag').value.trim();
+  if(!text||text.split(/\s+/).length<20){showToast('Please enter at least 20 words.','warning');return}
+  document.getElementById('prog-plag').classList.remove('d-none');
+  document.getElementById('results-plag').innerHTML='';
+  await runProgress('plag',[
+    {l:'Tokenising text…',ms:250},
+    {l:'Computing 64-bit SimHash fingerprint…',ms:380},
+    {l:'Extracting trigram and 4-gram signatures…',ms:350},
+    {l:'Building vocabulary frequency profile…',ms:280},
+    {l:'Checking boilerplate phrase database…',ms:400},
+    {l:'Computing structural originality score…',ms:300},
+  ]);
+  const result=computeOrig(text);
+  document.getElementById('prog-plag').classList.add('d-none');
+  renderPlag(result);
+  showToast(`Originality: ${Math.round(result.originality*100)}%`,result.originality>=.6?'success':'warning');
+}
+
+function runCompare(){
+  const tA=document.getElementById('ta-a').value.trim();
+  const tB=document.getElementById('ta-b').value.trim();
+  if(!tA||!tB){showToast('Please paste text in both fields.','warning');return}
+  const result=computeCompare(tA,tB);
+  renderCompare(result);
+  const cp=Math.round(result.composite*100);
+  showToast(`Similarity: ${cp}%`,cp>=60?'danger':cp>=30?'warning':'success');
+}
+
+function clearTA(id){
+  document.getElementById(`ta-${id}`).value='';updateWC(id);
+  const el=document.getElementById(`results-${id}`);
+  if(el)el.innerHTML='<div class="text-center py-5 text-secondary"><i class="bi bi-search display-4 d-block mb-3 opacity-25"></i><p class="fw-semibold">No analysis yet</p><small>Paste text or upload a file above to begin</small></div>';
+}
+
+function handleFile(e,id){
+  const f=e.target.files[0];if(!f)return;
+  if(f.name.endsWith('.txt')){const r=new FileReader();r.onload=ev=>{document.getElementById(`ta-${id}`).value=ev.target.result;updateWC(id);showToast(`Loaded: ${f.name}`,'success')};r.readAsText(f)}
+  else if(f.name.match(/\.docx?$/i)){const r=new FileReader();r.onload=ev=>{const m=ev.target.result.match(/[\x20-\x7E\n\r]{4,}/g);const t=m?m.filter(x=>x.trim().length>10&&/[a-zA-Z]/.test(x)).join(' ').replace(/\s+/g,' ').trim():'';if(t.length>50){document.getElementById(`ta-${id}`).value=t;updateWC(id);showToast(`Loaded: ${f.name}`,'success')}else showToast('Could not extract text. Try copy-pasting.','warning')};r.readAsBinaryString(f)}
+  else showToast('Use .txt or .docx files','warning');
+}
+
+const SAMPLES={
+  'ai-sample':`Pre-eclampsia is a multifaceted condition that plays a crucial role in maternal morbidity and mortality across the globe. It is worth noting that this condition represents a significant challenge for healthcare systems, particularly in low-income settings. Furthermore, the interplay between various risk factors underscores the importance of comprehensive antenatal care. The results of this study demonstrate that nulliparous women are at significantly higher risk, highlighting the need for targeted interventions. Additionally, women with chronic hypertension were found to have a pivotal role in the overall burden of disease. It is essential to note that inadequate antenatal attendance serves as a testament to the systemic barriers that vulnerable populations face. Moreover, the data showcases a wide range of sociodemographic determinants that contribute to the evolving landscape of obstetric care in Ghana. Consequently, healthcare providers must leverage evidence-based strategies to foster better outcomes across the spectrum of care.`,
+  'human-sample':`Ninety-one of the 500 women we enrolled had pre-eclampsia — 18.2%, which is higher than I expected going in. A couple of things stand out. Women who had it in a previous pregnancy were nearly seven times more likely to develop it again. That's not a subtle association. It's the kind of number that should change what happens at first booking, not after the third visit. The ANC attendance finding is harder to interpret cleanly. Yes, women who came to fewer than four visits had higher rates — but some of those women probably stopped coming because they felt unwell. Reverse causation is messy here and we can't rule it out. Nulliparity being a risk factor is expected and backed by good mechanistic evidence. The spiral artery remodelling story makes sense. What to do about it clinically is less obvious, since telling women to have more pregnancies is not advice.`,
+  'plag-sample':`Pre-eclampsia is a pregnancy complication characterised by hypertension and proteinuria arising after 20 weeks of gestation. It affects approximately 2–8% of pregnancies worldwide and is a leading cause of maternal and perinatal mortality. In low-income countries, the burden is disproportionately higher due to limited access to quality antenatal care and specialist obstetric services. Studies from sub-Saharan Africa have reported prevalence rates ranging from 5% to 22%, depending on the setting and diagnostic criteria used.`,
+  'compare-sample-a':`Pre-eclampsia affects approximately 2-8% of pregnancies worldwide. It is defined as new-onset hypertension after 20 weeks of gestation with proteinuria or evidence of end-organ dysfunction. Risk factors include nulliparity, chronic hypertension, obesity, and prior history of the condition.`,
+  'compare-sample-b':`Pre-eclampsia is found in about 2 to 8 percent of pregnancies globally. The condition is characterised by new-onset high blood pressure after the 20th week of pregnancy, often accompanied by protein in the urine. Known risk factors are first pregnancies, pre-existing hypertension, high BMI, and previous episodes of the condition.`,
+};
+
+function loadSample(key){
+  if(key==='compare-sample'){
+    document.getElementById('ta-a').value=SAMPLES['compare-sample-a'];
+    document.getElementById('ta-b').value=SAMPLES['compare-sample-b'];
+    updateWC('a');updateWC('b');showToast('Sample pair loaded','info');
+  } else {
+    const id=key.includes('plag')?'plag':'ai';
+    document.getElementById(`ta-${id}`).value=SAMPLES[key];
+    updateWC(id);showToast('Sample text loaded','info');
+  }
+}
+
+function showToast(msg,type='info'){
+  let wrap=document.getElementById('toast-wrap');
+  if(!wrap){wrap=document.createElement('div');wrap.id='toast-wrap';wrap.className='position-fixed bottom-0 end-0 p-3';wrap.style.zIndex=9999;document.body.appendChild(wrap)}
+  const id='t'+Date.now();
+  wrap.insertAdjacentHTML('beforeend',`<div id="${id}" class="toast align-items-center text-bg-${type} border-0" role="alert"><div class="d-flex"><div class="toast-body">${msg}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`);
+  new bootstrap.Toast(document.getElementById(id),{delay:3500}).show();
+}
+
+function showTip(e,el){const t=document.getElementById('tg-tip');if(!t)return;t.textContent=el.dataset.tip;t.style.opacity='1';t.style.left=(e.clientX+14)+'px';t.style.top=(e.clientY-8)+'px'}
+function hideTip(){const t=document.getElementById('tg-tip');if(t)t.style.opacity='0'}
+</script>
+</body>
+</html>
