@@ -774,8 +774,8 @@ async function runProgress(id,steps){
 }
 
 async function runAI(){
-  const text=document.getElementById('ta-ai').value.trim();
-  if(!text||text.split(/\s+/).length<30){showToast('Please enter at least 30 words.','warning');return}
+  const text=getText('ai');
+  if(!text||text.split(/\s+/).length<30){showToast('Please paste text or attach a file — minimum 30 words.','warning');return}
   const btn=document.getElementById('btn-ai');
   btn.disabled=true;btn.innerHTML='<span class="spinner-border spinner-border-sm me-2"></span>Analysing…';
   document.getElementById('prog-ai').classList.remove('d-none');
@@ -801,8 +801,8 @@ async function runAI(){
 }
 
 async function runPlag(){
-  const text=document.getElementById('ta-plag').value.trim();
-  if(!text||text.split(/\s+/).length<20){showToast('Please enter at least 20 words.','warning');return}
+  const text=getText('plag');
+  if(!text||text.split(/\s+/).length<20){showToast('Please paste text or attach a file — minimum 20 words.','warning');return}
   document.getElementById('prog-plag').classList.remove('d-none');
   document.getElementById('results-plag').innerHTML='';
   await runProgress('plag',[
@@ -820,9 +820,9 @@ async function runPlag(){
 }
 
 function runCompare(){
-  const tA=document.getElementById('ta-a').value.trim();
-  const tB=document.getElementById('ta-b').value.trim();
-  if(!tA||!tB){showToast('Please paste text in both fields.','warning');return}
+  const tA=getText('a');
+  const tB=getText('b');
+  if(!tA||!tB){showToast('Please paste or attach text in both fields.','warning');return}
   const result=computeCompare(tA,tB);
   renderCompare(result);
   const cp=Math.round(result.composite*100);
@@ -830,16 +830,79 @@ function runCompare(){
 }
 
 function clearTA(id){
-  document.getElementById(`ta-${id}`).value='';updateWC(id);
+  document.getElementById(`ta-${id}`).value='';
+  updateWC(id);
+  removeAttachment(id);
   const el=document.getElementById(`results-${id}`);
   if(el)el.innerHTML='<div class="text-center py-5 text-secondary"><i class="bi bi-search display-4 d-block mb-3 opacity-25"></i><p class="fw-semibold">No analysis yet</p><small>Paste text or upload a file above to begin</small></div>';
 }
 
-function handleFile(e,id){
-  const f=e.target.files[0];if(!f)return;
-  if(f.name.endsWith('.txt')){const r=new FileReader();r.onload=ev=>{document.getElementById(`ta-${id}`).value=ev.target.result;updateWC(id);showToast(`Loaded: ${f.name}`,'success')};r.readAsText(f)}
-  else if(f.name.match(/\.docx?$/i)){const r=new FileReader();r.onload=ev=>{const m=ev.target.result.match(/[\x20-\x7E\n\r]{4,}/g);const t=m?m.filter(x=>x.trim().length>10&&/[a-zA-Z]/.test(x)).join(' ').replace(/\s+/g,' ').trim():'';if(t.length>50){document.getElementById(`ta-${id}`).value=t;updateWC(id);showToast(`Loaded: ${f.name}`,'success')}else showToast('Could not extract text. Try copy-pasting.','warning')};r.readAsBinaryString(f)}
-  else showToast('Use .txt or .docx files','warning');
+// Stores extracted text per panel — separate from what user types
+const attachedText = {};
+
+function handleFile(e, id) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const allowed = f.name.match(/\.(txt|doc|docx)$/i);
+  if (!allowed) { showToast('Supported: .txt, .doc, .docx', 'warning'); return; }
+
+  const read = (text) => {
+    if (!text || text.trim().length < 20) {
+      showToast('Could not read file content. Try copy-pasting the text.', 'warning');
+      return;
+    }
+    // Store extracted text for analysis — do NOT put it in the textarea
+    attachedText[id] = text.trim();
+    showAttachmentCard(id, f.name, text.trim());
+    showToast(`Attached: ${f.name}`, 'success');
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
+  if (f.name.endsWith('.txt')) {
+    const r = new FileReader();
+    r.onload = ev => read(ev.target.result);
+    r.readAsText(f);
+  } else {
+    const r = new FileReader();
+    r.onload = ev => {
+      const m = ev.target.result.match(/[\x20-\x7E\n\r]{4,}/g);
+      const t = m ? m.filter(x => x.trim().length > 10 && /[a-zA-Z]/.test(x)).join(' ').replace(/\s+/g, ' ').trim() : '';
+      read(t);
+    };
+    r.readAsBinaryString(f);
+  }
+}
+
+function showAttachmentCard(id, filename, text) {
+  const existing = document.getElementById(`attach-card-${id}`);
+  if (existing) existing.remove();
+  const words = text.split(/\s+/).length;
+  const card = document.createElement('div');
+  card.id = `attach-card-${id}`;
+  card.className = 'alert alert-secondary d-flex align-items-center gap-3 mt-2 mb-0 py-2';
+  card.innerHTML = `
+    <i class="bi bi-file-earmark-text fs-5 text-primary flex-shrink-0"></i>
+    <div class="flex-grow-1">
+      <div class="fw-semibold small">${filename}</div>
+      <div class="text-secondary" style="font-size:.75rem">${words.toLocaleString()} words extracted — ready for analysis</div>
+    </div>
+    <button class="btn-close btn-close-white" onclick="removeAttachment('${id}')"></button>`;
+  // Insert after the card-footer of this panel
+  const footer = document.querySelector(`#panel-${id === 'a' || id === 'b' ? 'compare' : id} .card-footer`);
+  if (footer) footer.after(card);
+}
+
+function removeAttachment(id) {
+  delete attachedText[id];
+  const card = document.getElementById(`attach-card-${id}`);
+  if (card) card.remove();
+  showToast('Attachment removed', 'info');
+}
+
+// Get text for analysis — prefers attachment, falls back to textarea
+function getText(id) {
+  return attachedText[id] || document.getElementById(`ta-${id}`)?.value?.trim() || '';
 }
 
 const SAMPLES={
